@@ -29,3 +29,4 @@ hs_err_pid*
 /table/table-spring/src/main/resources/compose/
 /media/media-spring/target/
 /media/media-java-client/target/
+/storage/storage-spring/target/

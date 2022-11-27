@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>hu.yokudlela</groupId>
+        <artifactId>yokudlela-oe</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>storage-spring</artifactId>
+    <packaging>jar</packaging>
+    <properties>
+        <exec.mainClass>hu.yokudlela.storage.Storage</exec.mainClass>
+    </properties>
+    <name>storage-spring</name>
+    
+    <dependencies>
+        <!-- tools -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.20</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+</project>
