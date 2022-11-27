@@ -1,0 +1,6 @@
+version: '3'
+services:
+  table:
+    image: jakaberas/yokudlela:storage-4.0
+    ports:
+      - 8080:8080
