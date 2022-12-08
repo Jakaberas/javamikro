@@ -1,0 +1,26 @@
+<db:databaseChangeLog xmlns:db="http://www.liquibase.org/xml/ns/dbchangelog"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <db:changeSet id="5" author="Jakab">
+        <db:createTable tableName="waste">
+            <db:column name="id" type="BIGINT"></db:column>
+            <db:column name="removed" type="boolean"></db:column>
+            <db:column name="name" type="varchar(1024)"  ></db:column>
+            <db:column name="count" type="int"  ></db:column>            
+            <db:column name="price" type="int"  ></db:column>
+            <db:column name="arrived_at" type="datetime"  ></db:column>   
+        </db:createTable>
+        <db:createIndex tableName="waste" indexName="waste-id">
+            <db:column name="id"></db:column>
+        </db:createIndex>      
+        </db:changeSet> 
+        <db:changeSet id="hibernate_sequence" author="Jakab">
+        <db:createTable tableName="hibernate_sequence">
+            <db:column name="sequence_name" type="varchar(255)"  ></db:column>
+            <db:column name="next_val" type="BIGINT"  ></db:column>                      
+        </db:createTable>
+       <db:insert tableName="hibernate_sequence">
+            <db:column name="next_val" value="0"></db:column>
+        </db:insert>
+    </db:changeSet>
+</db:databaseChangeLog>

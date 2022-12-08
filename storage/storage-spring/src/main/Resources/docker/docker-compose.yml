@@ -1,49 +1,158 @@
-version: '3'
-services:
-#  table:
-#    image: krisztian4dsoft/yokudlela:table-latest
-#    ports:
-#      - 8080:8080
+version: '3.8'
 
-  db:
-    image: mariadb:10.1.34
-    environment:
-      PROXY_ADDRESS_FORWARDING: 'true'
-      MYSQL_ROOT_PASSWORD: yokudlela
-      MYSQL_DATABASE: keycloak
-      MYSQL_USER: yokudlela
-      MYSQL_PASSWORD: yokudlela
-    ports:
+volumes:
+  mysql_data:
+      driver: local
+  mongo_data:
+      driver: local
+  elastic_data:
+      driver: local
+  rabbitmq_data:
+      driver: local
+services:
+  mariadb:
+      image: mariadb:10.1.34
+      volumes:
+        - ./init-db/iam.sql:/docker-entrypoint-initdb.d/1.sql:ro
+        - ./init-db/storage-service.sql:/docker-entrypoint-initdb.d/2.sql:ro
+        - mysql_data:/var/lib/mysql
+      ports:
       - '3306:3306'
-    restart: on-failure
-    healthcheck:
+      environment:
+        MYSQL_ROOT_PASSWORD: yokudlela
+        MYSQL_DATABASE: keycloak
+        MYSQL_USER: yokudlela
+        MYSQL_PASSWORD: yokudlela
+      # Copy-pasted from https://github.com/docker-library/mariadb/issues/94
+      healthcheck:
         test: ["CMD", "mysqladmin", "ping", "--silent"]
-    volumes:
-     - ./../../disks/sql:/var/lib/mysql
-    networks:
-      - demo_mesh
-     
   keycloak:
-    image: jboss/keycloak:12.0.4
-    ports:
+      image: jboss/keycloak:12.0.4
+      ports:
       - "6080:8080"
+      hostname: keycloak
+      environment:
+        DB_VENDOR: mariadb
+        DB_ADDR: mariadb
+        DB_DATABASE: keycloak
+        DB_USER: yokudlela
+        DB_PASSWORD: yokudlela
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: yokudlela
+        KEYCLOAK_IMPORT: /tmp/example-realm.json
+        JGROUPS_DISCOVERY_PROTOCOL: JDBC_PING
+        #azbesztmegbassza
+        KEYCLOAK_FRONTEND_URL: http://yokudlela:6080/auth 
+      volumes: 
+           - ./realm-export.json:/tmp/example-realm.json
+      depends_on:
+        - mariadb
+        
+  storage:
+    image: jakaberas/yokudlela:latest
     environment:
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=yokudlela
-      - DB_VENDOR=mariadb
-      - DB_USER=yokudlela
-      - DB_PASSWORD=yokudlela
-      - DB_ADDR=db
-      - DB_DATABASE=keycloak
-      - DB_PORT=3306
-      - KEYCLOAK_IMPORT=/tmp/example-realm.json
-    volumes:
-      - ./realm-export.json:/tmp/example-realm.json
+         - KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8080/auth
+         - SPRING_LIQUIBASE_ENABLED=true
+         - SPRING_DATASOURCE_URL=jdbc:mysql://mariadb:3306/service_storage?useUnicode=true&characterEncoding=UTF-8&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+         - CLIENT_WASTE=http://waste:8081/waste
+    ports:
+      - 8080:8080
     depends_on:
-      db:
-        condition: service_healthy    
-    networks:
-          - demo_mesh
+      mariadb:
+        condition: service_healthy
+  waste:
+    image: jakaberas/yokudlela-waste:latest
+    environment:
+         - KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8080/auth
+         - SPRING_LIQUIBASE_ENABLED=true
+         - SPRING_DATASOURCE_URL=jdbc:mysql://mariadb:3306/service_waste?useUnicode=true&characterEncoding=UTF-8&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    ports:
+         - 8081:8081         
+    depends_on:
+      mariadb:
+        condition: service_healthy
+#    logging:
+#      driver: gelf 
+#      options:
+#        gelf-address: "udp://yokudlela:12201"
+
+   
+# docker inspect --format "{{json .State.Health }}" container_id      
+
+  cache:
+   image: redis:6.2.6
+   ports:
+     - "6379:6379"
+  # MongoDB: https://hub.docker.com/_/mongo/
+  mongo:
+   image: mongo:4.2
+   volumes:
+    - mongo_data:/data/db
+#      networks:
+#        - graylog
+    # Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/7.10/docker.html
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=localhost
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+#      networks:
+#        - graylog
+
+    # Graylog: https://hub.docker.com/r/graylog/graylog/
+  graylog:
+    image: graylog/graylog:4.2
+    environment:
+        # CHANGE ME (must be at least 16 characters)!
+        - GRAYLOG_PASSWORD_SECRET=somepasswordpepper
+        # Password: admin
+        - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+        - GRAYLOG_HTTP_EXTERNAL_URI=http://yokudlela:9000/
+    entrypoint: /usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh
+#      networks:
+#        - graylog
+#      restart: always
+    depends_on:
+        - mongo
+        - elasticsearch
+    ports:
+        # Graylog web interface and REST API
+        - 9000:9000
+        # Syslog TCP
+        - 1514:1514
+        # Syslog UDP
+        - 1514:1514/udp
+        # GELF TCP
+        - 12201:12201
+        # GELF UDP
+        - 12201:12201/udp
+#  networks:
+#    graylog:
+#      driver: bridge
+  rabbitmq:
+        image: rabbitmq:3.9-management
+        environment:
+          RABBITMQ_DEFAULT_USER: yokudlela
+          RABBITMQ_DEFAULT_PASS: yokudlela
+        volumes:
+          - rabbitmq_data:/var/lib/rabbitmq
+        ports:
+          - "15672:15672"
+          - "5672:5672"
+
           
-networks:
-  demo_mesh: {}
+           
+
+

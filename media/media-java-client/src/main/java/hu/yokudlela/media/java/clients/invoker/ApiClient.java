@@ -51,7 +51,7 @@ import hu.yokudlela.media.java.clients.invoker.auth.HttpBasicAuth;
 import hu.yokudlela.media.java.clients.invoker.auth.ApiKeyAuth;
 import hu.yokudlela.media.java.clients.invoker.auth.OAuth;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2022-11-27T13:23:14.288640500+01:00[Europe/Prague]")public class ApiClient {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2022-12-06T16:38:14.407539300+01:00[Europe/Prague]")public class ApiClient {
   protected Map<String, String> defaultHeaderMap = new HashMap<String, String>();
   protected String basePath = "http://yokudlela:8060/media";
   protected boolean debugging = false;

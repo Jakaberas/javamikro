@@ -30,3 +30,8 @@ hs_err_pid*
 /media/media-spring/target/
 /media/media-java-client/target/
 /storage/storage-spring/target/
+/storage/StorageApplication/target/
+/wastemanagement/waste-spring/target/
+/wastemanagement/waste-client/target/
+/waste/waste-client/target/
+/waste/waste-spring/target/

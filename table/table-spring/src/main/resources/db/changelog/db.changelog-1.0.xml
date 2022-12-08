@@ -81,8 +81,4 @@
         </db:insert>
 
     </db:changeSet>
-    
-    
-    
-        
 </db:databaseChangeLog>

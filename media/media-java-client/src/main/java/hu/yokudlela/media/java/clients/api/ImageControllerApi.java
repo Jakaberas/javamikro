@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2022-11-27T13:23:14.288640500+01:00[Europe/Prague]")public class ImageControllerApi {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2022-12-06T16:38:14.407539300+01:00[Europe/Prague]")public class ImageControllerApi {
   private ApiClient apiClient;
 
   public ImageControllerApi() {

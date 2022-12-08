@@ -10,6 +10,11 @@ import hu.yokudlela.storage.store.ProductRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,26 +28,33 @@ public class StorageService {
     ProductRepository repository;
     
     
-    public List<ProductQuantity> getProductQuantities() {
-        List<ProductQuantity> list = new ArrayList<ProductQuantity>();
-        list.add(new ProductQuantity("uborka", 10));
+    public List<ProductQuantity> getProductQuantities() {       
+        Map<String, List<Product>> result = StreamSupport.stream(repository.findAll().spliterator(),false).collect(Collectors.groupingBy(Product::getName));
+         List<ProductQuantity> list = new ArrayList<ProductQuantity>();
+         result.entrySet().forEach(group -> {
+             list.add(new ProductQuantity(group.getKey(),(int)group.getValue().stream().mapToInt(m->m.getCount()).count()));
+        });       
         return list;
     }
 
     public void addProduct(Product product) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        repository.save(product);
     }
 
-    public void deleteProduct(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void deleteProduct(Long id) {
+        repository.deleteById(id);
     }
 
-    public void removeExpiredProducts(LocalDateTime parse) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void removeExpiredProducts(LocalDateTime parse) {   
+            repository.deleteAll(this.getExpiredProducts(parse));
+    }
+    public Optional<Product> getProductById(Long id)
+    {
+        return repository.findById(id);
     }
     
-    private List<Integer> getExpiredProducts(LocalDateTime date)
+    public List<Product> getExpiredProducts(LocalDateTime date)
     {
-        return null;
+      return repository.findByExpirationDateLessThanEqual(date);
     }
 }

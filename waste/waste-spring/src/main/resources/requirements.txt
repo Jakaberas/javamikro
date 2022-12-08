@@ -1,0 +1,4 @@
+
+Szeretnék megvalósítani egy Selejtező/szemét kezelő szolgáltatást. Ebben a szolgáltatásban nyílván lesz tartva a kidbott áru neve, értéke, mennyisége ,hogy mikor lett kidobva,
+ és hogy el-lett e már szállítva. Ezen nyílvántartás feltöltése a raktár szolgáltatás termék törlés metódus híváskor fog egy új bejegyzést létrehozni.
+Fontosabb üzleti funkciói pedig hulladék keletkezett (WasteIncome), ahol a nyiltvántartásba történő feltvétel fog végbemenni, valamint hulladék ürítés (EmptyTrash), ami "elszállítja" a keletkezett hulladékot.

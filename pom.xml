@@ -9,6 +9,7 @@
         <module>table</module>
         <module>media</module>
         <module>storage</module>
+        <module>waste</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
