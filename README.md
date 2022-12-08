@@ -1,6 +1,8 @@
 # Yokudlela
 Java Microservice projekt example.
 
+Csernyey-Jakab Erika AO5ED1
+
 ## Task
 - Kapcsoljunk össze szolgáltatásokat asszinron módon egy RabbitMQ segítségével.
 https://youtu.be/1PFNQPi0mPE
